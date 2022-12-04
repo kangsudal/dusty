@@ -1,3 +1,5 @@
+import 'package:dusty/component/card_title.dart';
+import 'package:dusty/component/main_card.dart';
 import 'package:dusty/const/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -11,34 +13,12 @@ class CategoryCard extends StatelessWidget {
     return SizedBox(
       //Horizontal viewport was given unbounded height. Card의 전체 크기를 제한해줘야한다.
       height: 160,
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-        color: lightColor,
+      child: MainCard(
         child: LayoutBuilder(builder: (context, constraints) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                child: Text(
-                  '종류별 통계',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                decoration: BoxDecoration(
-                  color: darkColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                padding: EdgeInsets.all(4),
-              ),
+              CardTitle(title: '종류별 통계',),
               Expanded(
                 //Column안에 스크롤되는 위젯들을 넣을땐 Expanded로 감싸줘야 Horizontal viewport was given unbounded height을 피할 수 있다.
                 child: ListView(
