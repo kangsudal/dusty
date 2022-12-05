@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:dusty/component/category_card.dart';
+import 'package:dusty/component/hourly_card.dart';
 import 'package:dusty/component/main_app_bar.dart';
+import 'package:dusty/component/main_card.dart';
 import 'package:dusty/component/main_drawer.dart';
 import 'package:dusty/const/colors.dart';
 import 'package:dusty/model/stat_model.dart';
@@ -56,6 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 CategoryCard(),
+                SizedBox(height: 16),
+                HourlyCard(),
               ],
             ),
           )
