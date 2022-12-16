@@ -7,6 +7,7 @@ import 'package:dusty/component/main_drawer.dart';
 import 'package:dusty/const/colors.dart';
 import 'package:dusty/const/regions.dart';
 import 'package:dusty/const/status_level.dart';
+import 'package:dusty/model/stat_and_status_model.dart';
 import 'package:dusty/model/stat_model.dart';
 import 'package:dusty/repository/stat_rerpository.dart';
 import 'package:dusty/utils/data_utils.dart';
@@ -69,13 +70,29 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           Map<ItemCode, List<StatModel>> stats = snapshot.data!;
-          StatModel pm10RecentStat = stats[ItemCode.PM10]![0];
+          StatModel pm10RecentStat = stats[ItemCode.PM10]![0]; //제일 첫번째 시간의 값
 
           final status = DataUtils.getStatusFromItemCodeAndValue(
             value: pm10RecentStat.seoul,
             itemCode: ItemCode.PM10,
           );
 
+          final ssModel = (stats.keys.map((itemCode) {
+            final statModelList = stats[itemCode]!;
+            //stats[PM10]은 미세먼지의 List<StatModel>를 가져온다. 0시~12시가지
+            final stat = statModelList[0];
+            //종류별 통계에 들어갈것은 가장 가까운 시간이니까 제일 첫번째 시간인 0이 들어간다.
+
+            return StatAndStatusModel(
+                itemCode: itemCode,
+                //status는 가장 첫번째 시간의 값이 어떤상태인지
+                status: DataUtils.getStatusFromItemCodeAndValue(
+                  value: stat.getLevelFromRegion(region),
+                  //stats[itemCode][0].seoul, itemCode(아황산가스)의 모든 시간 중 첫번째시간[0] 중 region이 seoul인 값
+                  itemCode: itemCode, //ItemCode.PM10,
+                ),
+                stat: stat);
+          })).toList();
           return CustomScrollView(
             slivers: [
               MainAppBar(
@@ -88,9 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    CategoryCard(),
+                    CategoryCard(
+                      models: ssModel,
+                      region: region,
+                    ), //종류별 통계
                     SizedBox(height: 16),
-                    HourlyCard(),
+                    HourlyCard(), //시간별 미세먼지
                   ],
                 ),
               ),
