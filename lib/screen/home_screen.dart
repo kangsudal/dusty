@@ -25,9 +25,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Map<ItemCode, List<StatModel>>> fetchData() async {
     Map<ItemCode, List<StatModel>> stats = {};
+    List<Future<List<StatModel>>> futures = [];
     for (ItemCode itemCode in ItemCode.values) {
-      final statModels = await StatRepository.fetchData(itemCode: itemCode);
-      stats.addAll({itemCode: statModels});
+      final Future<List<StatModel>> response =
+          StatRepository.fetchData(itemCode: itemCode);
+      futures.add(response);
+    }
+    final results = await Future.wait(futures); //모든 future들이 다 끝날때까지 기다린다.
+
+    for (int i = 0; i < results.length; i++) {
+      final key = ItemCode.values[i]; //itemCode
+      final value = results[i];
+      stats.addAll({key: value});
     }
     return stats;
   }
@@ -50,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
-              child: Text(snapshot.error.toString()),//Text('에러가 있습니다.'),
+              child: Text(snapshot.error.toString()), //Text('에러가 있습니다.'),
             );
           }
           if (!snapshot.hasData) {
