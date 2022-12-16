@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryColor,
+      // backgroundColor: primaryColor,
       drawer: MainDrawer(
         selectedRegion: region,
         onRegionTap: (String region) {
@@ -72,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Map<ItemCode, List<StatModel>> stats = snapshot.data!;
           StatModel pm10RecentStat = stats[ItemCode.PM10]![0]; //제일 첫번째 시간의 값
 
+          //미세먼지 최근 데이터의 현재 상태
           final status = DataUtils.getStatusFromItemCodeAndValue(
             value: pm10RecentStat.seoul,
             itemCode: ItemCode.PM10,
@@ -93,28 +94,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 stat: stat);
           })).toList();
-          return CustomScrollView(
-            slivers: [
-              MainAppBar(
-                region: region,
-                stat: pm10RecentStat,
-                status: status,
-              ),
-              SliverToBoxAdapter(
-                //Sliver가 아닌 위젯을 넣을 수 있게해준다
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CategoryCard(
-                      models: ssModel,
-                      region: region,
-                    ), //종류별 통계
-                    SizedBox(height: 16),
-                    HourlyCard(), //시간별 미세먼지
-                  ],
+          return Container(
+            color: status.primaryColor,
+            child: CustomScrollView(
+              slivers: [
+                MainAppBar(
+                  region: region,
+                  stat: pm10RecentStat,
+                  status: status,
                 ),
-              ),
-            ],
+                SliverToBoxAdapter(
+                  //Sliver가 아닌 위젯을 넣을 수 있게해준다
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CategoryCard(
+                        models: ssModel,
+                        region: region,
+                        darkColor: status.darkColor,
+                        lightColor: status.lightColor,
+                      ), //종류별 통계
+                      SizedBox(height: 16),
+                      HourlyCard(
+                        darkColor: status.darkColor,
+                        lightColor: status.lightColor,
+                      ), //시간별 미세먼지
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

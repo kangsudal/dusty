@@ -10,11 +10,15 @@ import 'main_stat.dart';
 class CategoryCard extends StatelessWidget {
   final List<StatAndStatusModel> models;
   final String region;
+  final Color darkColor;
+  final Color lightColor;
 
   const CategoryCard({
     Key? key,
     required this.region,
     required this.models,
+    required this.darkColor,
+    required this.lightColor,
   }) : super(key: key);
 
   @override
@@ -23,12 +27,14 @@ class CategoryCard extends StatelessWidget {
       //Horizontal viewport was given unbounded height. Card의 전체 크기를 제한해줘야한다.
       height: 160,
       child: MainCard(
+        backgroundColor: lightColor,
         child: LayoutBuilder(builder: (context, constraints) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CardTitle(
                 title: '종류별 통계',
+                backgroundColor: darkColor,
               ),
               Expanded(
                 //Column안에 스크롤되는 위젯들을 넣을땐 Expanded로 감싸줘야 Horizontal viewport was given unbounded height을 피할 수 있다.
@@ -39,7 +45,7 @@ class CategoryCard extends StatelessWidget {
                       .map(
                         (model) => MainStat(
                           category: DataUtils.getItemCodeKrString(
-                              itemCode: model.itemCode),//미세먼지, 초미세먼지, 아황산가스
+                              itemCode: model.itemCode), //미세먼지, 초미세먼지, 아황산가스
                           imgPath: model.status.imagePath,
                           level: model.status.label, //최고
                           stat:
