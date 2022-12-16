@@ -6,10 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MainAppBar extends StatelessWidget {
+  final String region;
   final StatusModel status;
   final StatModel stat;
 
-  const MainAppBar({required this.status, required this.stat, Key? key}) : super(key: key);
+  const MainAppBar({
+    required this.region,
+    required this.status,
+    required this.stat,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,7 @@ class MainAppBar extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  '서울',
+                  region,
                   style: ts.copyWith(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
