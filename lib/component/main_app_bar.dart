@@ -1,6 +1,7 @@
 import 'package:dusty/const/colors.dart';
 import 'package:dusty/model/stat_model.dart';
 import 'package:dusty/model/status_model.dart';
+import 'package:dusty/utils/data_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class MainAppBar extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  getTimeFromDateTime(dateTime: stat.dataTime),
+                  DataUtils.getTimeFromDateTime(dateTime: stat.dataTime),
                   style: ts.copyWith(fontSize: 20),
                 ),
                 SizedBox(height: 20),
@@ -61,13 +62,5 @@ class MainAppBar extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  getTimeFromDateTime({required DateTime dateTime}){
-    return '${dateTime.year}-${dateTime.month}-${dateTime.day} ${getTimeFormat(dateTime.hour)}:${getTimeFormat(dateTime.minute)}';
-  }
-
-  String getTimeFormat(int number){
-    return number.toString().padLeft(2,'0');//길이가 2이하면 0으로 채운다
   }
 }

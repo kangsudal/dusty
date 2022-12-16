@@ -8,6 +8,7 @@ import 'package:dusty/const/colors.dart';
 import 'package:dusty/const/status_level.dart';
 import 'package:dusty/model/stat_model.dart';
 import 'package:dusty/repository/stat_rerpository.dart';
+import 'package:dusty/utils/data_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -52,9 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
           List<StatModel> stats = snapshot.data!;
           StatModel recentStat = stats[0];
 
-          final status = statusLevel
-              .where((element) => element.minFineDust < recentStat.seoul)
-              .last;
+          final status = DataUtils.getStatusFromItemCodeAndValue(
+            value: recentStat.seoul,
+            itemCode: ItemCode.PM10,
+          );
 
           return CustomScrollView(
             slivers: [
