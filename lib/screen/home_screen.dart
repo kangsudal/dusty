@@ -115,10 +115,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         lightColor: status.lightColor,
                       ), //종류별 통계
                       SizedBox(height: 16),
-                      HourlyCard(
-                        darkColor: status.darkColor,
-                        lightColor: status.lightColor,
-                      ), //시간별 미세먼지
+                      ...stats.keys.map((itemCode) {
+                        final stat = stats[itemCode]!;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: HourlyCard(
+                            darkColor: status.darkColor,
+                            lightColor: status.lightColor,
+                            category: DataUtils.getItemCodeKrString(
+                              itemCode: itemCode,//ItemCode.PM10,
+                            ),
+                            stats: stat, //stats[ItemCode.PM10]!,
+                            region: region,
+                          ),
+                        );
+                      }).toList(),
+                      //시간별 미세먼지
+                      SizedBox(height: 16),
                     ],
                   ),
                 ),

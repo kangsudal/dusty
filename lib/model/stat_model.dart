@@ -31,7 +31,7 @@ class StatModel {
   final double jeju;
   final double chungbuk;
   final double gyeongnam;
-  final DateTime dataTime;
+  final DateTime dateTime;
   final double gyeonggi;
   final ItemCode itemCode;
 
@@ -53,7 +53,7 @@ class StatModel {
         jeju = double.parse(json['jeju'] ?? '0'),
         chungbuk = double.parse(json['chungbuk'] ?? '0'),
         gyeongnam = double.parse(json['gyeongnam'] ?? '0'),
-        dataTime = DateTime.parse(json['dataTime']),
+        dateTime = DateTime.parse(json['dataTime']),
         gyeonggi = double.parse(json['gyeonggi'] ?? '0'),
         itemCode = parseItemCode(json['itemCode']);
 
@@ -64,7 +64,7 @@ class StatModel {
     return ItemCode.values.firstWhere((element) => element.name == raw);
   }
 
-  double getLevelFromRegion(String region) {
+  double getLevelFromRegion(String region) {//지역별 미세먼지, 초미세먼지, 아황산가스 등등의 수치
     if (region == '서울') {
       return seoul;
     } else if (region == '경기') {

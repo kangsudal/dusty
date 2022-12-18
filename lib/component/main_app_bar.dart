@@ -38,7 +38,7 @@ class MainAppBar extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  DataUtils.getTimeFromDateTime(dateTime: stat.dataTime),
+                  DataUtils.getTimeFromDateTime(dateTime: stat.dateTime),
                   style: ts.copyWith(fontSize: 20),
                 ),
                 SizedBox(height: 20),
