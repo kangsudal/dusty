@@ -23,6 +23,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String region = regions[0];
+  bool isExpanded = true;
+  ScrollController scrollController = ScrollController();
 
   Future<Map<ItemCode, List<StatModel>>> fetchData() async {
     Map<ItemCode, List<StatModel>> stats = {};
@@ -40,6 +42,33 @@ class _HomeScreenState extends State<HomeScreen> {
       stats.addAll({key: value});
     }
     return stats;
+  }
+
+  scrollListener() {
+    bool isExpanded = scrollController.offset < (500 - kToolbarHeight);
+    //offset: 현재 스크롤 하는 위치를 알 수 있다.
+    //SliverAppBar- expandedHeight: 500
+    //스크롤한 위치가 앱바 500을 다 덮으면 isExpanded가 false가 된다
+    //기본 앱바의 높이만큼 덜덮여도(500보다 작아도) false가 되어야하므로 -kToobarHeight를 해준다
+    if(isExpanded != this.isExpanded){
+      setState(() {
+        this.isExpanded = isExpanded;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(scrollListener);
+    //scrollController가 움직일때(값이 바뀔때) scrollListener를 실행한다
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(scrollListener);
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,11 +126,14 @@ class _HomeScreenState extends State<HomeScreen> {
           return Container(
             color: status.primaryColor,
             child: CustomScrollView(
+              controller: scrollController,
               slivers: [
                 MainAppBar(
                   region: region,
                   stat: pm10RecentStat,
                   status: status,
+                  dateTime: pm10RecentStat.dateTime,
+                  isExpanded: isExpanded,
                 ),
                 SliverToBoxAdapter(
                   //Sliver가 아닌 위젯을 넣을 수 있게해준다
@@ -123,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             darkColor: status.darkColor,
                             lightColor: status.lightColor,
                             category: DataUtils.getItemCodeKrString(
-                              itemCode: itemCode,//ItemCode.PM10,
+                              itemCode: itemCode, //ItemCode.PM10,
                             ),
                             stats: stat, //stats[ItemCode.PM10]!,
                             region: region,
