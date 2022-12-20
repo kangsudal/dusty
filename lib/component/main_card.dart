@@ -17,7 +17,7 @@ class MainCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
-      color: lightColor,
+      color: backgroundColor,
       child: child,
     );
   }

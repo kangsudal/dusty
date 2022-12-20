@@ -7,9 +7,15 @@ typedef OnRegionTap = void Function(String region);
 class MainDrawer extends StatelessWidget {
   final OnRegionTap onRegionTap;
   final String selectedRegion;
-  const MainDrawer(
-      {required this.onRegionTap, required this.selectedRegion, Key? key})
-      : super(key: key);
+  final Color darkColor;
+  final Color lightColor;
+  const MainDrawer({
+    required this.onRegionTap,
+    required this.selectedRegion,
+    required this.darkColor,
+    required this.lightColor,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

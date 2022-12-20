@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //SliverAppBar- expandedHeight: 500
     //스크롤한 위치가 앱바 500을 다 덮으면 isExpanded가 false가 된다
     //기본 앱바의 높이만큼 덜덮여도(500보다 작아도) false가 되어야하므로 -kToobarHeight를 해준다
-    if(isExpanded != this.isExpanded){
+    if (isExpanded != this.isExpanded) {
       setState(() {
         this.isExpanded = isExpanded;
       });
@@ -73,57 +73,64 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: primaryColor,
-      drawer: MainDrawer(
-        selectedRegion: region,
-        onRegionTap: (String region) {
-          setState(() {
-            this.region = region;
-          });
-          Navigator.of(context).pop();
-        },
-      ),
-      body: FutureBuilder<Map<ItemCode, List<StatModel>>>(
-        future: fetchData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
+    return FutureBuilder<Map<ItemCode, List<StatModel>>>(
+      future: fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
               child: Text(snapshot.error.toString()), //Text('에러가 있습니다.'),
-            );
-          }
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          Map<ItemCode, List<StatModel>> stats = snapshot.data!;
-          StatModel pm10RecentStat = stats[ItemCode.PM10]![0]; //제일 첫번째 시간의 값
-
-          //미세먼지 최근 데이터의 현재 상태
-          final status = DataUtils.getStatusFromItemCodeAndValue(
-            value: pm10RecentStat.seoul,
-            itemCode: ItemCode.PM10,
+            ),
           );
+        }
+        if (!snapshot.hasData) {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
 
-          final ssModel = (stats.keys.map((itemCode) {
-            final statModelList = stats[itemCode]!;
-            //stats[PM10]은 미세먼지의 List<StatModel>를 가져온다. 0시~12시가지
-            final stat = statModelList[0];
-            //종류별 통계에 들어갈것은 가장 가까운 시간이니까 제일 첫번째 시간인 0이 들어간다.
+        Map<ItemCode, List<StatModel>> stats = snapshot.data!;
+        StatModel pm10RecentStat = stats[ItemCode.PM10]![0]; //제일 첫번째 시간의 값
 
-            return StatAndStatusModel(
-                itemCode: itemCode,
-                //status는 가장 첫번째 시간의 값이 어떤상태인지
-                status: DataUtils.getStatusFromItemCodeAndValue(
-                  value: stat.getLevelFromRegion(region),
-                  //stats[itemCode][0].seoul, itemCode(아황산가스)의 모든 시간 중 첫번째시간[0] 중 region이 seoul인 값
-                  itemCode: itemCode, //ItemCode.PM10,
-                ),
-                stat: stat);
-          })).toList();
-          return Container(
+        //미세먼지 최근 데이터의 현재 상태
+        final status = DataUtils.getStatusFromItemCodeAndValue(
+          value: pm10RecentStat.seoul,
+          itemCode: ItemCode.PM10,
+        );
+
+        final ssModel = (stats.keys.map((itemCode) {
+          final statModelList = stats[itemCode]!;
+          //stats[PM10]은 미세먼지의 List<StatModel>를 가져온다. 0시~12시가지
+          final stat = statModelList[0];
+          //종류별 통계에 들어갈것은 가장 가까운 시간이니까 제일 첫번째 시간인 0이 들어간다.
+
+          return StatAndStatusModel(
+              itemCode: itemCode,
+              //status는 가장 첫번째 시간의 값이 어떤상태인지
+              status: DataUtils.getStatusFromItemCodeAndValue(
+                value: stat.getLevelFromRegion(region),
+                //stats[itemCode][0].seoul, itemCode(아황산가스)의 모든 시간 중 첫번째시간[0] 중 region이 seoul인 값
+                itemCode: itemCode, //ItemCode.PM10,
+              ),
+              stat: stat);
+        })).toList();
+
+        return Scaffold(
+          // backgroundColor: primaryColor,
+          drawer: MainDrawer(
+            selectedRegion: region,
+            onRegionTap: (String region) {
+              setState(() {
+                this.region = region;
+              });
+              Navigator.of(context).pop();
+            },
+            darkColor: status.darkColor,
+            lightColor: status.lightColor,
+          ),
+          body: Container(
             color: status.primaryColor,
             child: CustomScrollView(
               controller: scrollController,
@@ -169,9 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
