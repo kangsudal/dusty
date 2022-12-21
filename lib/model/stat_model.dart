@@ -1,39 +1,92 @@
+import 'package:hive_flutter/hive_flutter.dart';
+part 'stat_model.g.dart'; //Hive와 모델(클래스)들이 연결 되도록 해주는 중간다리 코드. `flutter pub run build_runner build`를 통해 생성.
+
+@HiveType(typeId: 2)
 enum ItemCode {
   //오타가 날 수 없도록
   //미세먼지
+  @HiveField(0)
   PM10,
   //초미세먼지
+  @HiveField(1)
   PM25,
   //이산화질소
+  @HiveField(2)
   NO2,
   //오존
+  @HiveField(3)
   O3,
   //일산화탄소
+  @HiveField(4)
   CO,
   //이황산가스
+  @HiveField(5)
   SO2,
 }
 
+@HiveType(typeId: 1) //모델(클래스) 등록
 class StatModel {
+  @HiveField(0) //필드 등록. 한번 정해준 번호는 다시 쓸 수 없다
   final double daegu;
+  @HiveField(1)
   final double chungnam;
+  @HiveField(2)
   final double incheon;
+  @HiveField(3)
   final double daejeon;
+  @HiveField(4)
   final double gyeongbuk;
+  @HiveField(5)
   final double sejong;
+  @HiveField(6)
   final double gwangju;
+  @HiveField(7)
   final double jeonbuk;
+  @HiveField(8)
   final double gangwon;
+  @HiveField(9)
   final double ulsan;
+  @HiveField(10)
   final double jeonnam;
+  @HiveField(11)
   final double seoul;
+  @HiveField(12)
   final double busan;
+  @HiveField(13)
   final double jeju;
+  @HiveField(14)
   final double chungbuk;
+  @HiveField(15)
   final double gyeongnam;
+  @HiveField(16)
   final DateTime dateTime;
+  @HiveField(17)
   final double gyeonggi;
+  @HiveField(18)
   final ItemCode itemCode;
+
+  //Named constructor 말고도 기본 constructor가 필요하다 Hive는
+  StatModel({
+    required this.daegu,
+    required this.chungnam,
+    required this.incheon,
+    required this.daejeon,
+    required this.gyeongbuk,
+    required this.sejong,
+    required this.gwangju,
+    required this.jeonbuk,
+    required this.gangwon,
+    required this.ulsan,
+    required this.jeonnam,
+    required this.seoul,
+    required this.busan,
+    required this.jeju,
+    required this.chungbuk,
+    required this.gyeongnam,
+    required this.dateTime,
+    required this.gyeonggi,
+    required this.itemCode,
+  });
 
   //JSON형태에서부터 데이터를 받아온다.
   StatModel.fromJson({required Map<String, dynamic> json})
@@ -64,7 +117,8 @@ class StatModel {
     return ItemCode.values.firstWhere((element) => element.name == raw);
   }
 
-  double getLevelFromRegion(String region) {//지역별 미세먼지, 초미세먼지, 아황산가스 등등의 수치
+  double getLevelFromRegion(String region) {
+    //지역별 미세먼지, 초미세먼지, 아황산가스 등등의 수치
     if (region == '서울') {
       return seoul;
     } else if (region == '경기') {
