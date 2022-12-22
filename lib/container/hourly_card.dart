@@ -4,39 +4,44 @@ import 'package:dusty/model/stat_model.dart';
 import 'package:dusty/model/status_model.dart';
 import 'package:dusty/utils/data_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HourlyCard extends StatelessWidget {
   final Color darkColor;
   final Color lightColor;
-  final String category;
-  final List<StatModel> stats;
   final String region;
+  final ItemCode itemCode;
 
   const HourlyCard(
       {required this.darkColor,
       required this.lightColor,
-      required this.category,
-      required this.stats,
+        required this.itemCode,
       required this.region,
       Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MainCard(
-      backgroundColor: lightColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CardTitle(
-            title: '시간별 $category',
-            backgroundColor: darkColor,
+    return ValueListenableBuilder<Box>(
+      valueListenable: Hive.box<StatModel>(itemCode.name).listenable(),
+      builder: (context, box,_) {
+        final stats = box.values;
+        return MainCard(
+          backgroundColor: lightColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CardTitle(
+                title: '시간별 ${DataUtils.getItemCodeKrString(itemCode: itemCode)}',
+                backgroundColor: darkColor,
+              ),
+              Column(
+                children: stats.map((stat) => renderRow(stat: stat)).toList(),
+              )
+            ],
           ),
-          Column(
-            children: stats.map((stat) => renderRow(stat: stat)).toList(),
-          )
-        ],
-      ),
+        );
+      }
     );
   }
 

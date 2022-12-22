@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:dusty/component/category_card.dart';
-import 'package:dusty/component/hourly_card.dart';
+import 'package:dusty/container/category_card.dart';
+import 'package:dusty/container/hourly_card.dart';
 import 'package:dusty/component/main_app_bar.dart';
 import 'package:dusty/component/main_card.dart';
 import 'package:dusty/component/main_drawer.dart';
@@ -14,6 +14,7 @@ import 'package:dusty/utils/data_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isExpanded = true;
   ScrollController scrollController = ScrollController();
 
-  Future<Map<ItemCode, List<StatModel>>> fetchData() async {
+  Future<void> fetchData() async {
     //List: 시간별, StatModel: 각 지역별 데이터 모아놓은 객체
     // Map<ItemCode, List<StatModel>> stats = {};
     List<Future<List<StatModel>>> futures = [];
@@ -49,15 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
         box.put(stat.dateTime.toString(), stat);
       }
     }
-    //저장해준 Hive에서 데이터를 꺼내서 리턴해준다
-    return ItemCode.values.fold<Map<ItemCode, List<StatModel>>>({},
-        (previousMap, itemCode) {
-      final box = Hive.box<StatModel>(itemCode.name);
-      previousMap.addAll({
-        itemCode: box.values.toList(), //{'PM10':List<StatModel>} 초미세먼지의 시간별 StatModel
-      });
-      return previousMap;
-    });
   }
 
   scrollListener() {
@@ -78,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     scrollController.addListener(scrollListener);
     //scrollController가 움직일때(값이 바뀔때) scrollListener를 실행한다
+    fetchData();
   }
 
   @override
@@ -89,50 +82,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<ItemCode, List<StatModel>>>(
-      future: fetchData(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Text(snapshot.error.toString()), //Text('에러가 있습니다.'),
-            ),
-          );
+    return ValueListenableBuilder<Box>(
+      valueListenable: Hive.box<StatModel>(ItemCode.PM10.name).listenable(),
+      builder: (context, box, widget) {
+        if(box.values.isEmpty){
+          return Center(child: CircularProgressIndicator());
         }
-        if (!snapshot.hasData) {
-          return Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        Map<ItemCode, List<StatModel>> stats = snapshot.data!;
-        StatModel pm10RecentStat = stats[ItemCode.PM10]![0]; //제일 첫번째 시간의 값
-
+        final StatModel recentStat =
+            box.values.toList().last as StatModel; //박스에서 가장 최근(시간대) 데이터
         //미세먼지 최근 데이터의 현재 상태
         final status = DataUtils.getStatusFromItemCodeAndValue(
-          value: pm10RecentStat.seoul,
+          value: recentStat.getLevelFromRegion(region), //지역 데이터
           itemCode: ItemCode.PM10,
         );
-
-        final ssModel = (stats.keys.map((itemCode) {
-          final statModelList = stats[itemCode]!;
-          //stats[PM10]은 미세먼지의 List<StatModel>를 가져온다. 0시~12시가지
-          final stat = statModelList[0];
-          //종류별 통계에 들어갈것은 가장 가까운 시간이니까 제일 첫번째 시간인 0이 들어간다.
-
-          return StatAndStatusModel(
-              itemCode: itemCode,
-              //status는 가장 첫번째 시간의 값이 어떤상태인지
-              status: DataUtils.getStatusFromItemCodeAndValue(
-                value: stat.getLevelFromRegion(region),
-                //stats[itemCode][0].seoul, itemCode(아황산가스)의 모든 시간 중 첫번째시간[0] 중 region이 seoul인 값
-                itemCode: itemCode, //ItemCode.PM10,
-              ),
-              stat: stat);
-        })).toList();
-
         return Scaffold(
           // backgroundColor: primaryColor,
           drawer: MainDrawer(
@@ -153,9 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
               slivers: [
                 MainAppBar(
                   region: region,
-                  stat: pm10RecentStat,
+                  stat: recentStat,
                   status: status,
-                  dateTime: pm10RecentStat.dateTime,
+                  dateTime: recentStat.dateTime,
                   isExpanded: isExpanded,
                 ),
                 SliverToBoxAdapter(
@@ -164,23 +126,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CategoryCard(
-                        models: ssModel,
                         region: region,
                         darkColor: status.darkColor,
                         lightColor: status.lightColor,
                       ), //종류별 통계
                       SizedBox(height: 16),
-                      ...stats.keys.map((itemCode) {
-                        final stat = stats[itemCode]!;
+                      ...ItemCode.values.map((itemCode) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
                           child: HourlyCard(
                             darkColor: status.darkColor,
                             lightColor: status.lightColor,
-                            category: DataUtils.getItemCodeKrString(
-                              itemCode: itemCode, //ItemCode.PM10,
-                            ),
-                            stats: stat, //stats[ItemCode.PM10]!,
+                            itemCode: itemCode,
                             region: region,
                           ),
                         );
