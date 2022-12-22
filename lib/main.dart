@@ -11,7 +11,7 @@ Future main() async{
   Hive.registerAdapter<StatModel>(StatModelAdapter());//<연결해줄 모델>(코드제너레이션을 통해 생성된 아답터)를 통해 하이브에서 데이터를 불러오거나 저장한다.
   Hive.registerAdapter<ItemCode>(ItemCodeAdapter());
   for(ItemCode itemCode in ItemCode.values){
-    await Hive.openBox(itemCode.name);
+    await Hive.openBox<StatModel>(itemCode.name);
   }
 
   runApp(

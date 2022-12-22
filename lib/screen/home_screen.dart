@@ -13,6 +13,7 @@ import 'package:dusty/repository/stat_rerpository.dart';
 import 'package:dusty/utils/data_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive/hive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ScrollController scrollController = ScrollController();
 
   Future<Map<ItemCode, List<StatModel>>> fetchData() async {
-    Map<ItemCode, List<StatModel>> stats = {};
+    //List: 시간별, StatModel: 각 지역별 데이터 모아놓은 객체
+    // Map<ItemCode, List<StatModel>> stats = {};
     List<Future<List<StatModel>>> futures = [];
     for (ItemCode itemCode in ItemCode.values) {
       final Future<List<StatModel>> response =
@@ -36,12 +38,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     final results = await Future.wait(futures); //모든 future들이 다 끝날때까지 기다린다.
 
+    Map<ItemCode, List<StatModel>> statsByItemCode;
     for (int i = 0; i < results.length; i++) {
-      final key = ItemCode.values[i]; //itemCode
-      final value = results[i];
-      stats.addAll({key: value});
+      final key = ItemCode.values[i]; //ItemCode
+      final value = results[i]; //List<StatModel>
+
+      //Hive에 데이터를 저장해준다.
+      final box = Hive.box<StatModel>(key.name);
+      for (StatModel stat in value) {
+        box.put(stat.dateTime.toString(), stat);
+      }
     }
-    return stats;
+    //저장해준 Hive에서 데이터를 꺼내서 리턴해준다
+    return ItemCode.values.fold<Map<ItemCode, List<StatModel>>>({},
+        (previousMap, itemCode) {
+      final box = Hive.box<StatModel>(itemCode.name);
+      previousMap.addAll({
+        itemCode: box.values.toList(), //{'PM10':List<StatModel>} 초미세먼지의 시간별 StatModel
+      });
+      return previousMap;
+    });
   }
 
   scrollListener() {
