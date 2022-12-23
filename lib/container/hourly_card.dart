@@ -36,7 +36,8 @@ class HourlyCard extends StatelessWidget {
             builder: (context, box, _) {
               final stats = box.values;
               return Column(
-                children: stats.map((stat) => renderRow(stat: stat)).toList(),
+                //최근 시간부터 나오도록
+                children: stats.toList().reversed.map((stat) => renderRow(stat: stat)).toList(),
               );
             },
           ),

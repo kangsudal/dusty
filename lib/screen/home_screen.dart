@@ -29,6 +29,24 @@ class _HomeScreenState extends State<HomeScreen> {
   ScrollController scrollController = ScrollController();
 
   Future<void> fetchData() async {
+    final now = DateTime.now();
+    final fetchTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+    );
+
+    final box = Hive.box<StatModel>(ItemCode.PM10.name);
+    final recent = box.values.last as StatModel;
+    //최근데이터시간과 동일하다면 밑에 코드들을 실행할 필요가 없다.
+
+    if (fetchTime.isAtSameMomentAs(recent.dateTime)) {
+      //isSameMomentAs:시간 비교
+      print('이미 최신데이터가 있습니다.');
+      return;
+    }
+
     //List: 시간별, StatModel: 각 지역별 데이터 모아놓은 객체
     // Map<ItemCode, List<StatModel>> stats = {};
     List<Future<List<StatModel>>> futures = [];
@@ -48,6 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
       final box = Hive.box<StatModel>(key.name);
       for (StatModel stat in value) {
         box.put(stat.dateTime.toString(), stat);
+      }
+      final allKeys = box.keys.toList();
+      if (allKeys.length > 24) {
+        //모든 데이터의 개수가 24개 이상일때
+        //처음~24개까지 데이터만 남기고 지워준다
+        final deleteKeys = allKeys.sublist(0, allKeys.length - 24);
+        //제일 과거 데이터부터~최근24개빼고 담는다
+
+        box.deleteAll(deleteKeys);
       }
     }
   }
@@ -85,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ValueListenableBuilder<Box>(
       valueListenable: Hive.box<StatModel>(ItemCode.PM10.name).listenable(),
       builder: (context, box, widget) {
-        if(box.values.isEmpty){
+        if (box.values.isEmpty) {
           return Center(child: CircularProgressIndicator());
         }
         final StatModel recentStat =
