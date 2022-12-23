@@ -15,33 +15,33 @@ class HourlyCard extends StatelessWidget {
   const HourlyCard(
       {required this.darkColor,
       required this.lightColor,
-        required this.itemCode,
+      required this.itemCode,
       required this.region,
       Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Box>(
-      valueListenable: Hive.box<StatModel>(itemCode.name).listenable(),
-      builder: (context, box,_) {
-        final stats = box.values;
-        return MainCard(
-          backgroundColor: lightColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CardTitle(
-                title: '시간별 ${DataUtils.getItemCodeKrString(itemCode: itemCode)}',
-                backgroundColor: darkColor,
-              ),
-              Column(
-                children: stats.map((stat) => renderRow(stat: stat)).toList(),
-              )
-            ],
+    return MainCard(
+      backgroundColor: lightColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CardTitle(
+            title: '시간별 ${DataUtils.getItemCodeKrString(itemCode: itemCode)}',
+            backgroundColor: darkColor,
           ),
-        );
-      }
+          ValueListenableBuilder<Box>(
+            valueListenable: Hive.box<StatModel>(itemCode.name).listenable(),
+            builder: (context, box, _) {
+              final stats = box.values;
+              return Column(
+                children: stats.map((stat) => renderRow(stat: stat)).toList(),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
